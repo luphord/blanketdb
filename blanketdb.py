@@ -40,13 +40,17 @@ def _parse_dt(s):
         return date.today()
     elif s.lower() == 'yesterday':
         return date.today() - timedelta(days=1)
-    elif s.lower().endswith('days') or s.lower().endswith('day') or s.lower().endswith('d'):
+    elif s.lower().endswith('days') \
+            or s.lower().endswith('day') \
+            or s.lower().endswith('d'):
         try:
             days = int(s.split('d')[0])
         except ValueError:
             return ''
         return datetime.now() - timedelta(days=days)
-    elif s.lower().endswith('hours') or s.lower().endswith('hour') or s.lower().endswith('h'):
+    elif s.lower().endswith('hours') \
+            or s.lower().endswith('hour') \
+            or s.lower().endswith('h'):
         try:
             hours = int(s.split('h')[0])
         except ValueError:
