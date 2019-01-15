@@ -7,9 +7,10 @@ __author__ = 'luphord'
 __email__ = 'luphord@protonmail.com'
 __version__ = '0.1.0'
 
-import os, json, sqlite3
+import json
 from datetime import datetime, date, timedelta
 import urllib.parse
+
 
 def parse_form(form_s):
     '''Parse url encoded form and convert numerical types'''
@@ -28,6 +29,7 @@ def parse_form(form_s):
                 else:
                     d[k] = v
     return d
+
 
 def _parse_dt(s):
     '''Parse string using custom differential date formats like "2 days"'''
@@ -64,14 +66,17 @@ def _parse_dt(s):
         return datetime.now() - timedelta(seconds=seconds)
     return s
 
+
 def _json_default(obj):
     if isinstance(obj, datetime) or isinstance(obj, date):
         return obj.isoformat()
     raise TypeError(type(obj))
 
+
 def serialize_json(data, indent=2):
     '''Serialize to json supporting dates'''
     return json.dumps(data, indent=indent, default=_json_default)
+
 
 def j(obj_to_serialize=None, **kwargs):
     '''Serialize `obj_to_serialize` or keyword arguments as dict to json

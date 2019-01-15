@@ -51,7 +51,7 @@ clean-test: ## remove test and coverage artifacts
 	rm -fr .pytest_cache
 
 lint: ## check style with flake8
-	flake8 blanketdb tests
+	flake8 blanketdb.py tests
 
 test: ## run tests quickly with the default Python
 	python setup.py test
