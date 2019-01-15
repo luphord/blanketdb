@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""Tests for `blanketdb` package."""
+"""Tests for `blanketdb` module."""
 
 
 import unittest
+import json
 
 from datetime import datetime, date, timedelta
-from blanketdb import parse_form, _parse_dt, serialize_json
+from blanketdb import parse_form, _parse_dt, serialize_json, j
 
 def is_close(dt1, dt2, max_diff_sec=10):
     return abs(dt1.timestamp() - dt2.timestamp()) < max_diff_sec
@@ -66,3 +67,9 @@ class TestBlanketdb(unittest.TestCase):
         self.assertEqual('{}', serialize_json({}))
         self.assertEqual('"2030-01-02"', serialize_json(date(2030,1,2)))
         self.assertEqual('"2030-01-02T03:04:05"', serialize_json(datetime(2030,1,2,3,4,5)))
+    
+    def test_j(self):
+        '''Test function for serializing to json and encoding bytes'''
+        self.assertEqual(b'{}', j({}))
+        self.assertEqual(b'"2030-01-02"', j(date(2030,1,2)))
+        self.assertEqual(dict(a=2, b=3), json.loads(j(a=2, b=3).decode('utf8'))) # avoid indent comparison by decoding json again

@@ -72,3 +72,10 @@ def _json_default(obj):
 def serialize_json(data, indent=2):
     '''Serialize to json supporting dates'''
     return json.dumps(data, indent=indent, default=_json_default)
+
+def j(obj_to_serialize=None, **kwargs):
+    '''Serialize `obj_to_serialize` or keyword arguments as dict to json
+       and encode to bytes'''
+    if obj_to_serialize is None:
+        obj_to_serialize = kwargs
+    return serialize_json(obj_to_serialize).encode('utf8')
