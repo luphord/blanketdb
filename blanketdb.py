@@ -63,3 +63,12 @@ def _parse_dt(s):
             return ''
         return datetime.now() - timedelta(seconds=seconds)
     return s
+
+def _json_default(obj):
+    if isinstance(obj, datetime) or isinstance(obj, date):
+        return obj.isoformat()
+    raise TypeError(type(obj))
+
+def serialize_json(data, indent=2):
+    '''Serialize to json supporting dates'''
+    return json.dumps(data, indent=indent, default=_json_default)

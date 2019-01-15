@@ -7,7 +7,7 @@
 import unittest
 
 from datetime import datetime, date, timedelta
-from blanketdb import parse_form, _parse_dt
+from blanketdb import parse_form, _parse_dt, serialize_json
 
 def is_close(dt1, dt2, max_diff_sec=10):
     return abs(dt1.timestamp() - dt2.timestamp()) < max_diff_sec
@@ -60,3 +60,9 @@ class TestBlanketdb(unittest.TestCase):
         self.assertTrue(is_close(datetime.now() - timedelta(seconds=20), _parse_dt('20s')))
         self.assertTrue(is_close(datetime.now() - timedelta(seconds=20), _parse_dt('20sec')))
         self.assertTrue(is_close(datetime.now() - timedelta(seconds=20), _parse_dt('20 sec')))
+    
+    def test_serialize_json(self):
+        '''Test function for serializing json with dates'''
+        self.assertEqual('{}', serialize_json({}))
+        self.assertEqual('"2030-01-02"', serialize_json(date(2030,1,2)))
+        self.assertEqual('"2030-01-02T03:04:05"', serialize_json(datetime(2030,1,2,3,4,5)))
