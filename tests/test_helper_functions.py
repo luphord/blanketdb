@@ -24,9 +24,6 @@ class TestBlanketdb(unittest.TestCase):
     def tearDown(self):
         """Tear down test fixtures, if any."""
 
-    def test_000_something(self):
-        """Test something."""
-
     def test_parse_form(self):
         '''Test function for parsing and type converting forms'''
         self.assertEqual(dict(a='b'), parse_form('a=b'))
