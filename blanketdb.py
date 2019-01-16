@@ -95,6 +95,10 @@ class BlanketDB:
     '''A simple HTTP accessible database for IoT projects'''
 
     def __init__(self, connection_string, now=datetime.now):
+        '''Initialize `BlanketDB` instance using a `connection_string`
+           that can be understood by SQLite. `now` should be a function
+           returning the current datetime (or a suitable test replacement).
+        '''
         self.connection = sqlite3.connect(connection_string,
                                           detect_types=sqlite3.PARSE_DECLTYPES)
         with self.connection as conn:
@@ -103,6 +107,7 @@ class BlanketDB:
         self.now = now
 
     def store(self, data, bucket='default'):
+        '''Serialize `data` to json and store it under `bucket`'''
         entry_id = None
         bucket = bucket.lower()
         timestamp = self.now()
@@ -115,9 +120,11 @@ class BlanketDB:
                     timestamp=timestamp.isoformat(), data=data)
 
     def store_dict(self, bucket='default', **kwargs):
+        '''Serialize key word args to json and store under `bucket`'''
         return self.store(kwargs, bucket)
 
     def __iter__(self):
+        '''Iterate over all elements stored in this `BlanketDB` instance'''
         with self.connection as conn:
             c = conn.execute('SELECT rowid, * FROM blanketdb;')
             for id, bucket, timestamp, data in c.fetchall():
