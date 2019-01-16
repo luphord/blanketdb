@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""Tests for `blanketdb` module."""
+"""Tests for helper functions"""
 
 
 import unittest
@@ -15,8 +15,8 @@ def is_close(dt1, dt2, max_diff_sec=10):
     return abs(dt1.timestamp() - dt2.timestamp()) < max_diff_sec
 
 
-class TestBlanketdb(unittest.TestCase):
-    """Tests for `blanketdb` package."""
+class TestHelperFunctions(unittest.TestCase):
+    """Tests for helper functions"""
 
     def setUp(self):
         """Set up test fixtures, if any."""

@@ -8,8 +8,9 @@ __email__ = 'luphord@protonmail.com'
 __version__ = '0.1.0'
 
 import json
-from datetime import datetime, date, timedelta
+import sqlite3
 import urllib.parse
+from datetime import datetime, date, timedelta
 
 
 def parse_form(form_s):
@@ -88,3 +89,37 @@ def j(obj_to_serialize=None, **kwargs):
     if obj_to_serialize is None:
         obj_to_serialize = kwargs
     return serialize_json(obj_to_serialize).encode('utf8')
+
+
+class BlanketDB:
+    '''A simple HTTP accessible database for IoT projects'''
+
+    def __init__(self, connection_string, now=datetime.now):
+        self.connection = sqlite3.connect(connection_string,
+                                          detect_types=sqlite3.PARSE_DECLTYPES)
+        with self.connection as conn:
+            conn.execute('CREATE TABLE IF NOT EXISTS blanketdb ' +
+                         '(bucket text, timestamp timestamp, data text);')
+        self.now = now
+
+    def store(self, data, bucket='default'):
+        entry_id = None
+        bucket = bucket.lower()
+        timestamp = self.now()
+        with self.connection as conn:
+            c = conn.cursor()
+            c.execute('INSERT INTO blanketdb VALUES (?, ?, ?);',
+                      (bucket, timestamp, serialize_json(data, indent=None)))
+            entry_id = c.lastrowid
+        return dict(id=entry_id, bucket=bucket,
+                    timestamp=timestamp.isoformat(), data=data)
+
+    def store_dict(self, bucket='default', **kwargs):
+        return self.store(kwargs, bucket)
+
+    def __iter__(self):
+        with self.connection as conn:
+            c = conn.execute('SELECT rowid, * FROM blanketdb;')
+            for id, bucket, timestamp, data in c.fetchall():
+                yield dict(id=id, bucket=bucket,
+                           timestamp=timestamp, data=json.loads(data))
