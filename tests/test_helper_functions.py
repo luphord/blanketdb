@@ -8,7 +8,7 @@ import unittest
 import json
 
 from datetime import datetime, date, timedelta
-from blanketdb import parse_form, _parse_dt, serialize_json, j
+from blanketdb import _parse_form, _parse_dt, _serialize_json, _j
 
 
 def is_close(dt1, dt2, max_diff_sec=10):
@@ -26,13 +26,13 @@ class TestHelperFunctions(unittest.TestCase):
 
     def test_parse_form(self):
         '''Test function for parsing and type converting forms'''
-        self.assertEqual(dict(a='b'), parse_form('a=b'))
-        self.assertEqual(dict(a='b', c='d'), parse_form('a=b&c=d'))
-        self.assertEqual(dict(a=1), parse_form('a=1'))
-        self.assertEqual(1.1, parse_form('a=1.1')['a'])
-        self.assertEqual(float, type(parse_form('a=1.0')['a']))
-        self.assertEqual(dict(a=True), parse_form('a=true'))
-        self.assertEqual(dict(a=False), parse_form('a=false'))
+        self.assertEqual(dict(a='b'), _parse_form('a=b'))
+        self.assertEqual(dict(a='b', c='d'), _parse_form('a=b&c=d'))
+        self.assertEqual(dict(a=1), _parse_form('a=1'))
+        self.assertEqual(1.1, _parse_form('a=1.1')['a'])
+        self.assertEqual(float, type(_parse_form('a=1.0')['a']))
+        self.assertEqual(dict(a=True), _parse_form('a=true'))
+        self.assertEqual(dict(a=False), _parse_form('a=false'))
 
     def test_parse_date(self):
         '''Test function for customized date parsing'''
@@ -78,15 +78,15 @@ class TestHelperFunctions(unittest.TestCase):
 
     def test_serialize_json(self):
         '''Test function for serializing json with dates'''
-        self.assertEqual('{}', serialize_json({}))
-        self.assertEqual('"2030-01-02"', serialize_json(date(2030, 1, 2)))
+        self.assertEqual('{}', _serialize_json({}))
+        self.assertEqual('"2030-01-02"', _serialize_json(date(2030, 1, 2)))
         self.assertEqual('"2030-01-02T03:04:05"',
-                         serialize_json(datetime(2030, 1, 2, 3, 4, 5)))
+                         _serialize_json(datetime(2030, 1, 2, 3, 4, 5)))
 
     def test_j(self):
         '''Test function for serializing to json and encoding bytes'''
-        self.assertEqual(b'{}', j({}))
-        self.assertEqual(b'"2030-01-02"', j(date(2030, 1, 2)))
+        self.assertEqual(b'{}', _j({}))
+        self.assertEqual(b'"2030-01-02"', _j(date(2030, 1, 2)))
         # avoid indent comparison by decoding json again
         self.assertEqual(dict(a=2, b=3),
-                         json.loads(j(a=2, b=3).decode('utf8')))
+                         json.loads(_j(a=2, b=3).decode('utf8')))

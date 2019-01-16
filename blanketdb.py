@@ -13,7 +13,7 @@ import urllib.parse
 from datetime import datetime, date, timedelta
 
 
-def parse_form(form_s):
+def _parse_form(form_s):
     '''Parse url encoded form and convert numerical types'''
     d = dict()
     for k, v in urllib.parse.parse_qsl(form_s):
@@ -78,17 +78,17 @@ def _json_default(obj):
     raise TypeError(type(obj))
 
 
-def serialize_json(data, indent=2):
+def _serialize_json(data, indent=2):
     '''Serialize to json supporting dates'''
     return json.dumps(data, indent=indent, default=_json_default)
 
 
-def j(obj_to_serialize=None, **kwargs):
+def _j(obj_to_serialize=None, **kwargs):
     '''Serialize `obj_to_serialize` or keyword arguments as dict to json
        and encode to bytes'''
     if obj_to_serialize is None:
         obj_to_serialize = kwargs
-    return serialize_json(obj_to_serialize).encode('utf8')
+    return _serialize_json(obj_to_serialize).encode('utf8')
 
 
 class BlanketDB:
@@ -114,7 +114,7 @@ class BlanketDB:
         with self.connection as conn:
             c = conn.cursor()
             c.execute('INSERT INTO blanketdb VALUES (?, ?, ?);',
-                      (bucket, timestamp, serialize_json(data, indent=None)))
+                      (bucket, timestamp, _serialize_json(data, indent=None)))
             entry_id = c.lastrowid
         return dict(id=entry_id, bucket=bucket,
                     timestamp=timestamp.isoformat(), data=data)
