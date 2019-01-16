@@ -123,8 +123,21 @@ class BlanketDB:
         '''Serialize key word args to json and store under `bucket`'''
         return self.store(kwargs, bucket)
 
+    def __getitem__(self, entry_id):
+        '''Get a stored entry by its `entry_id`.
+           Return None if no entry exists for that ID.
+        '''
+        with self.connection as conn:
+            c = conn.execute('SELECT rowid, * FROM blanketdb WHERE rowid=?;', (entry_id,))
+            res = c.fetchone()
+            if res:
+                id, bucket, timestamp, data = res
+                return dict(id=id, bucket=bucket, timestamp=timestamp, data=json.loads(data))
+            else:
+                return None
+
     def __iter__(self):
-        '''Iterate over all elements stored in this `BlanketDB` instance'''
+        '''Iterate over all entries stored in this `BlanketDB` instance'''
         with self.connection as conn:
             c = conn.execute('SELECT rowid, * FROM blanketdb;')
             for id, bucket, timestamp, data in c.fetchall():

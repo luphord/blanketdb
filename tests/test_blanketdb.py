@@ -24,7 +24,12 @@ class TestBlanketdb(unittest.TestCase):
         data = dict(a=1, b=2)
         stored = self.db.store(data)
         self.assertEqual(data, stored['data'])
+        self.assertEqual(data, self.db[stored['id']]['data'])
         self.assertEqual(1, len(list(self.db)))
         self.assertEqual(data, list(self.db)[0]['data'])
-        self.assertEqual(dict(x='test'), self.db.store_dict(x='test')['data'])
+        stored2 = self.db.store_dict(x='test')
+        self.assertEqual(dict(x='test'), stored2['data'])
+        self.assertEqual(dict(x='test'), self.db[stored2['id']]['data'])
         self.assertEqual(2, len(list(self.db)))
+        not_in_db_id = abs(stored['id']) + abs(stored2['id']) + 1
+        self.assertEqual(None, self.db[not_in_db_id])
