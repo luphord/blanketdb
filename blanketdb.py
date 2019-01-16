@@ -128,11 +128,13 @@ class BlanketDB:
            Return None if no entry exists for that ID.
         '''
         with self.connection as conn:
-            c = conn.execute('SELECT rowid, * FROM blanketdb WHERE rowid=?;', (entry_id,))
+            c = conn.execute('SELECT rowid, * FROM blanketdb WHERE rowid=?;',
+                             (entry_id,))
             res = c.fetchone()
             if res:
                 id, bucket, timestamp, data = res
-                return dict(id=id, bucket=bucket, timestamp=timestamp, data=json.loads(data))
+                return dict(id=id, bucket=bucket,
+                            timestamp=timestamp, data=json.loads(data))
             else:
                 return None
 
