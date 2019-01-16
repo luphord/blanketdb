@@ -14,7 +14,7 @@ from datetime import datetime, date, timedelta
 
 
 def _parse_form(form_s):
-    '''Parse url encoded form and convert numerical types'''
+    '''Parse url encoded form and convert numerical types.'''
     d = dict()
     for k, v in urllib.parse.parse_qsl(form_s):
         try:
@@ -33,7 +33,7 @@ def _parse_form(form_s):
 
 
 def _parse_dt(s):
-    '''Parse string using custom differential date formats like "2 days"'''
+    '''Parse string using custom differential date formats like "2 days".'''
     if not s:
         return ''
     s = str(s)
@@ -79,13 +79,13 @@ def _json_default(obj):
 
 
 def _serialize_json(data, indent=2):
-    '''Serialize to json supporting dates'''
+    '''Serialize to json supporting dates.'''
     return json.dumps(data, indent=indent, default=_json_default)
 
 
 def _j(obj_to_serialize=None, **kwargs):
     '''Serialize `obj_to_serialize` or keyword arguments as dict to json
-       and encode to bytes'''
+       and encode to bytes.'''
     if obj_to_serialize is None:
         obj_to_serialize = kwargs
     return _serialize_json(obj_to_serialize).encode('utf8')
@@ -107,7 +107,7 @@ class BlanketDB:
         self.now = now
 
     def store(self, data, bucket='default'):
-        '''Serialize `data` to json and store it under `bucket`'''
+        '''Serialize `data` to json and store it under `bucket`.'''
         entry_id = None
         bucket = bucket.lower()
         timestamp = self.now()
@@ -120,7 +120,7 @@ class BlanketDB:
                     timestamp=timestamp.isoformat(), data=data)
 
     def store_dict(self, bucket='default', **kwargs):
-        '''Serialize key word args to json and store under `bucket`'''
+        '''Serialize key word args to json and store under `bucket`.'''
         return self.store(kwargs, bucket)
 
     def __getitem__(self, entry_id):
@@ -139,9 +139,14 @@ class BlanketDB:
                 return None
 
     def __iter__(self):
-        '''Iterate over all entries stored in this `BlanketDB` instance'''
+        '''Iterate over all entries stored in this `BlanketDB` instance.'''
         with self.connection as conn:
             c = conn.execute('SELECT rowid, * FROM blanketdb;')
             for id, bucket, timestamp, data in c.fetchall():
                 yield dict(id=id, bucket=bucket,
                            timestamp=timestamp, data=json.loads(data))
+
+    def __delitem__(self, entry_id):
+        '''Delete an entry by its `entry_id`.'''
+        with self.connection as conn:
+            conn.execute('DELETE FROM blanketdb WHERE rowid=?;', (entry_id,))

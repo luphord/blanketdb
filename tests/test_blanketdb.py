@@ -33,3 +33,5 @@ class TestBlanketdb(unittest.TestCase):
         self.assertEqual(2, len(list(self.db)))
         not_in_db_id = abs(stored['id']) + abs(stored2['id']) + 1
         self.assertEqual(None, self.db[not_in_db_id])
+        del self.db[stored['id']]
+        self.assertEqual(None, self.db[stored['id']])
