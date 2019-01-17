@@ -65,3 +65,23 @@ class TestBlanketdb(unittest.TestCase):
         for entry in self.db.query(newest_first=False):
             self.assertLess(i, entry['data']['number'])
             i = entry['data']['number']
+
+    def test_delete_from_python(self):
+        '''Test `BlanketDB.delete` method using Python API'''
+        for i in range(10):
+            resp = self.db.store_dict(bucket='testbucket', number=i)
+            if i == 0:
+                self.assertEqual(1, resp['id'], 'SQLite id changed unexpected')
+            if i == 4:
+                after_four = self.next_date
+            self.next_date += timedelta(seconds=4)
+        self.db.delete(since=after_four)
+        self.assertEqual(4, len(list(self.db)))
+        self.db.delete(before=after_four)
+        self.assertEqual(0, len(list(self.db)))
+        self.db.store_dict(bucket='testbucket', irrelevant='data')
+        self.db.store_dict(bucket='testbucket2', irrelevant='data')
+        self.db.delete(bucket='testbucket')
+        self.assertEqual(1, len(list(self.db)))
+        self.db.delete()
+        self.assertEqual(0, len(list(self.db)))

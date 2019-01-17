@@ -95,10 +95,10 @@ class BlanketDB:
     '''A simple HTTP accessible database for IoT projects'''
 
     _SOURCE = 'FROM blanketdb WHERE (? OR bucket=?) AND rowid>=? ' + \
-              'AND timestamp>=? AND (? OR rowid<?) AND (? OR timestamp<?) ' + \
-              'ORDER BY (? * rowid) DESC LIMIT ?;'
-    _QUERY = 'SELECT rowid, * ' + _SOURCE
-    _DELETE = 'DELETE ' + _SOURCE
+              'AND timestamp>=? AND (? OR rowid<?) AND (? OR timestamp<?)'
+    _QUERY = 'SELECT rowid, * ' + _SOURCE + \
+             ' ORDER BY (? * rowid) DESC LIMIT ?;'
+    _DELETE = 'DELETE ' + _SOURCE + ';'
 
     def __init__(self, connection_string, now=datetime.now):
         '''Initialize `BlanketDB` instance using a `connection_string`
@@ -178,3 +178,21 @@ class BlanketDB:
         '''Delete an entry by its `entry_id`.'''
         with self.connection as conn:
             conn.execute('DELETE FROM blanketdb WHERE rowid=?;', (entry_id,))
+
+    def delete(self, bucket=None,
+               since_id=0, since='',
+               before_id=None, before=None):
+        '''Delete entries from this `BlanketDB` instance
+           using various filters. `since` and `since_id` are inclusive,
+           `before` and `before` are exclusive regarding the specified value.
+        '''
+        is_bucket_requested = bool(bucket)
+        if is_bucket_requested:
+            bucket = bucket.lower()
+        since = _parse_dt(since)
+        before = _parse_dt(before)
+        with self.connection as conn:
+            conn.execute(BlanketDB._DELETE, (not is_bucket_requested, bucket,
+                         since_id, since,
+                         not before_id, before_id, not before, before))
+            return conn.execute('select changes();').fetchone()[0]
