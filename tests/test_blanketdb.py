@@ -7,6 +7,8 @@
 import unittest
 from datetime import datetime, timedelta
 
+from webtest import TestApp
+
 from blanketdb import BlanketDB
 
 
@@ -85,3 +87,10 @@ class TestBlanketdb(unittest.TestCase):
         self.assertEqual(1, len(list(self.db)))
         self.db.delete()
         self.assertEqual(0, len(list(self.db)))
+    
+    def test_web_requests(self):
+        app = TestApp(self.db)
+        resp = app.get('/', status=200)
+        self.assertEqual(0, len(resp.json['entries']))
+        resp = app.get('/_entry/123', status=404)
+        resp = app.get('/_entry/', status=400)
