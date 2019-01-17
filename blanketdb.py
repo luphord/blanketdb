@@ -94,6 +94,12 @@ def _j(obj_to_serialize=None, **kwargs):
 class BlanketDB:
     '''A simple HTTP accessible database for IoT projects'''
 
+    _SOURCE = 'FROM blanketdb WHERE (? OR bucket=?) AND rowid>=? ' + \
+              'AND timestamp>=? AND (? OR rowid<?) AND (? OR timestamp<?) ' + \
+              'ORDER BY (? * rowid) DESC LIMIT ?;'
+    _QUERY = 'SELECT rowid, * ' + _SOURCE
+    _DELETE = 'DELETE ' + _SOURCE
+
     def __init__(self, connection_string, now=datetime.now):
         '''Initialize `BlanketDB` instance using a `connection_string`
            that can be understood by SQLite. `now` should be a function
@@ -137,6 +143,28 @@ class BlanketDB:
                             timestamp=timestamp, data=json.loads(data))
             else:
                 return None
+
+    def query(self, bucket=None,
+              since_id=0, since='',
+              before_id=None, before=None,
+              limit=-1, newest_first=True):
+        '''Query this `BlanketDB` instance using various optional filters.
+           `since` and `since_id` are inclusive, `before` and `before` are
+           exclusive regarding the specified value.'''
+        is_bucket_requested = bool(bucket)
+        if is_bucket_requested:
+            bucket = bucket.lower()
+        since = _parse_dt(since)
+        before = _parse_dt(before)
+        with self.connection as conn:
+            c = conn.execute(BlanketDB._QUERY,
+                             (not is_bucket_requested, bucket,
+                              since_id, since,
+                              not before_id, before_id, not before, before,
+                              1 if newest_first else -1, limit))
+            for id, bucket, timestamp, data in c.fetchall():
+                yield dict(id=id, bucket=bucket,
+                           timestamp=timestamp, data=json.loads(data))
 
     def __iter__(self):
         '''Iterate over all entries stored in this `BlanketDB` instance.'''
