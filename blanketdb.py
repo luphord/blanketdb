@@ -91,6 +91,16 @@ def _j(obj_to_serialize=None, **kwargs):
     return _serialize_json(obj_to_serialize).encode('utf8')
 
 
+_HTTP_STATUS_CODES = {
+    200: '200 OK',
+    201: '201 Created',
+    400: '400 Bad Request',
+    404: '404 Not found',
+    405: '405 Method Not Allowed',
+    415: '415 Unsupported Media Type'
+}
+
+
 class BlanketDB:
     '''A simple HTTP accessible database for IoT projects'''
 
@@ -196,3 +206,134 @@ class BlanketDB:
                          since_id, since,
                          not before_id, before_id, not before, before))
             return conn.execute('select changes();').fetchone()[0]
+
+    def __call__(self, env, start_response):
+        '''WSGI conform callable method.'''
+        def start_json_response(status,
+                                headers=[('Content-Type',
+                                          'application/json')]):
+            start_response(_HTTP_STATUS_CODES[status], headers)
+
+        path = (env['PATH_INFO'] or '/').lower()
+        method = env['REQUEST_METHOD'].upper()
+        qs = _parse_form(env['QUERY_STRING'])
+        try:
+            show_meta = qs.get('meta', True)
+            since_id = qs.get('since_id', 0)
+            before_id = qs.get('before_id', None)
+            since = _parse_dt(qs.get('since', None))
+            before = _parse_dt(qs.get('before', None))
+            limit = int(qs.get('limit', -1))
+            newest_first = bool(qs.get('newest_first', True))
+        except Exception:
+            start_json_response(400)
+            yield _j(message='An error occured while' +
+                             ' parsing the query parameters',
+                     parameters=qs)
+            return
+
+        if method == 'GET':
+            if path.startswith('/_entry/'):
+                try:
+                    entry_id = int(path[8:])
+                except ValueError:
+                    start_json_response(400)
+                    yield _j(message='Path does not contain' +
+                                     ' a valid integer ID',
+                             path=path)
+                    return
+                entry = self[entry_id]
+                if entry:
+                    start_json_response(200)
+                    yield _j(entry if show_meta else entry['data'])
+                else:
+                    start_json_response(404)
+                    yield _j(message='Entry does not exist', id=entry_id)
+            else:
+                start_json_response(200)
+                bucket = path[1:]
+                if not bucket:
+                    bucket = None  # make it a little more explicit
+                entries = list(self.query(bucket, since_id, since,
+                               before_id, before, limit, newest_first))
+                last_id = max((entry['id'] for entry in entries), default=None)
+                entries = [entry if show_meta else entry['data']
+                           for entry in entries]
+                yield _j(bucket_requested=bucket,
+                         since_id=since_id,
+                         since=since if since else None,
+                         before_id=before_id,
+                         before=before if before else None,
+                         number_of_entries=len(entries),
+                         last_id=last_id,
+                         limit=limit if limit > -1 else None,
+                         newest_first=newest_first,
+                         entries=entries)
+
+        elif method == 'POST':
+            if path == '/_entry' or path.startswith('/_entry/'):
+                start_json_response(405)
+                yield _j(message='The HTTP method is not allowed' +
+                                 ' for this path',
+                         path=path, method=method)
+                return
+            try:
+                request_body_size = int(env.get('CONTENT_LENGTH', 0))
+            except ValueError:
+                request_body_size = 0
+            request_body = env['wsgi.input'].read(request_body_size)
+            bucket = 'default' if path == '/' else path[1:]
+            content_type = env.get('CONTENT_TYPE', 'application/json').lower()
+            if content_type.startswith('application/json'):
+                if request_body == b'':
+                    data = None
+                else:
+                    # ToDo: handle parser errors
+                    data = json.loads(request_body.decode('utf8'))
+            elif content_type.startswith('application/x-www-form-urlencoded'):
+                data = _parse_form(request_body.decode('utf8'))
+            else:
+                start_json_response(415)
+                yield _j(message='Supported media types are application/json' +
+                                 ' and application/x-www-form-urlencoded',
+                         media_type=content_type)
+                return
+            entry = self.store(data, bucket=bucket)
+            start_json_response(201)
+            yield _j(entry)
+
+        elif method == 'DELETE':
+            if path.startswith('/_entry/'):
+                try:
+                    entry_id = int(path[8:])
+                except ValueError:
+                    start_json_response(400)
+                    yield _j(message='Path does not contain' +
+                                     ' a valid integer ID',
+                             path=path)
+                    return
+                entry = self[entry_id]
+                if entry:
+                    start_json_response(200)
+                    del self[entry_id]
+                    yield _j(entry)
+                else:
+                    start_json_response(404)
+                    yield _j(message='Entry does not exist', id=entry_id)
+            else:
+                bucket = path[1:]
+                if not bucket:
+                    bucket = None  # make it a little more explicit
+                n = self.delete(bucket, since_id, since, before_id, before)
+                start_json_response(200)
+                yield _j(bucket_requested=bucket,
+                         since_id=since_id,
+                         since=since if since else None,
+                         before_id=before_id,
+                         before=before if before else None,
+                         number_of_entries_deleted=n)
+
+        else:
+            start_json_response(405)
+            yield _j(message='The HTTP method is not allowed for this path',
+                     path=path, method=method)
