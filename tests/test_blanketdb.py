@@ -87,15 +87,26 @@ class TestBlanketdb(unittest.TestCase):
         self.assertEqual(1, len(list(self.db)))
         self.db.delete()
         self.assertEqual(0, len(list(self.db)))
-    
+
     def test_web_requests(self):
         app = TestApp(self.db)
         resp = app.get('/', status=200)
         self.assertEqual(0, len(resp.json['entries']))
         app.get('/_entry/123', status=404)
         app.get('/_entry/', status=400)
+        # method not allowed
         app.post('/_entry', status=405)
         app.post('/_entry/123', status=405)
         app.put('/_entry/', status=405)
         app.put('/_entry/123', status=405)
         app.put('/anything', status=405)
+        # create entries
+        app.post('/', status=201)
+        app.post('/otherbucket', status=201)
+        app.post('/', dict(a=1), status=201)  # post form
+        app.post_json('/', dict(a=1), status=201)  # post json
+        self.assertEqual(4, len(app.get('/', status=200).json['entries']))
+        self.assertEqual(1, len(app.get('/otherbucket', status=200)
+                                   .json['entries']))
+        self.assertEqual(3, len(app.get('/default', status=200)
+                                   .json['entries']))
