@@ -115,3 +115,39 @@ class TestBlanketdb(unittest.TestCase):
                                         .json['entries']))
         self.assertEqual(3, len(self.app.get('/default', status=200)
                                         .json['entries']))
+
+    def test_delete_requests(self):
+        '''Test entry deletion'''
+        # delete by id
+        resp = self.app.post('/', status=201)
+        id_created = resp.json['id']
+        self.assertTrue(isinstance(id_created, int))
+        self.app.get('/_entry/{0}'.format(id_created), status=200)
+        self.app.delete('/_entry/{0}'.format(id_created), status=200)
+        self.app.get('/_entry/{0}'.format(id_created), status=404)
+        self.app.delete('/_entry/{0}'.format(id_created), status=404)
+        # delete by bucket
+        for i in range(3):
+            self.app.post('/', status=201)
+        for i in range(4):
+            self.app.post('/otherbucket', status=201)
+        self.assertEqual(3, self.app.get('/default', status=200)
+                                    .json['number_of_entries'])
+        self.app.delete('/default', status=200)
+        self.assertEqual(0, self.app.get('/default', status=200)
+                                    .json['number_of_entries'])
+        self.assertEqual(4, self.app.get('/otherbucket', status=200)
+                                    .json['number_of_entries'])
+        self.app.delete('/otherbucket', status=200)
+        self.assertEqual(0, self.app.get('/otherbucket', status=200)
+                                    .json['number_of_entries'])
+        self.app.delete('/otherbucket', status=200)  # still 200
+        for i in range(3):
+            self.app.post('/', status=201)
+        for i in range(4):
+            self.app.post('/otherbucket', status=201)
+        self.assertEqual(7, self.app.get('/', status=200)
+                                    .json['number_of_entries'])
+        self.app.delete('/', status=200)  # deletes all, not default bucket
+        self.assertEqual(0, self.app.get('/', status=200)
+                                    .json['number_of_entries'])
