@@ -36,6 +36,8 @@ def _parse_dt(s):
     '''Parse string using custom differential date formats like "2 days".'''
     if not s:
         return ''
+    if isinstance(s, datetime):
+        return s.isoformat(sep=' ')  # datetime format suitable for sqlite
     s = str(s)
     if s.lower() == 'today':
         return date.today()
