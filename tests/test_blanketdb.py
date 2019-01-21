@@ -93,6 +93,7 @@ class TestBlanketdb(unittest.TestCase):
         '''Test basic web requests'''
         resp = self.app.get('/', status=200)
         self.assertEqual(0, len(resp.json['entries']))
+        self.assertEqual(0, resp.json['number_of_entries'])
         self.app.get('/_entry/123', status=404)
         self.app.get('/_entry/', status=400)
 
@@ -115,6 +116,54 @@ class TestBlanketdb(unittest.TestCase):
                                         .json['entries']))
         self.assertEqual(3, len(self.app.get('/default', status=200)
                                         .json['entries']))
+
+    def test_query_requests(self):
+        '''Test querying'''
+        for i in range(10):
+            resp = self.app.post('/testbucket', dict(number=i), status=201)
+            if i == 0:
+                self.assertEqual(1, resp.json['id'],
+                                 'SQLite id changed unexpected')
+            if i == 4:
+                after_four = self.next_date
+            self.next_date += timedelta(seconds=4)
+        self.assertEqual(10, self.app.get('/testbucket', status=200)
+                                     .json['number_of_entries'])
+        self.assertEqual(0, self.app.get('/testbucket2', status=200)
+                                    .json['number_of_entries'])
+        self.assertEqual(10, self.app.get('/testbucket', dict(since_id=1),
+                                          status=200)
+                                     .json['number_of_entries'])
+        self.assertEqual(9, self.app.get('/testbucket', dict(since_id=2),
+                                         status=200)
+                                    .json['number_of_entries'])
+        self.assertEqual(8, self.app.get('/testbucket', dict(since_id=3),
+                                         status=200)
+                                    .json['number_of_entries'])
+        self.assertEqual(2, self.app.get('/testbucket', dict(before_id=3),
+                                         status=200)
+                                    .json['number_of_entries'])
+        self.assertEqual(6, self.app.get('/testbucket', dict(since=after_four),
+                                         status=200)
+                                    .json['number_of_entries'])
+        self.assertEqual(4, self.app.get('/testbucket',
+                                         dict(before=after_four),
+                                         status=200)
+                                    .json['number_of_entries'])
+        self.assertEqual(2, self.app.get('/testbucket',
+                                         dict(before=after_four, limit=2),
+                                         status=200)
+                                    .json['number_of_entries'])
+        i = 10
+        for entry in self.app.get('/', dict(newest_first=True), status=200) \
+                             .json['entries']:
+            self.assertGreater(i, entry['data']['number'])
+            i = entry['data']['number']
+        i = -1
+        for entry in self.app.get('/', dict(newest_first=False), status=200) \
+                             .json['entries']:
+            self.assertLess(i, entry['data']['number'])
+            i = entry['data']['number']
 
     def test_delete_requests(self):
         '''Test entry deletion'''
