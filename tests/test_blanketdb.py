@@ -19,6 +19,7 @@ class TestBlanketdb(unittest.TestCase):
         """Set up test instance of `BlanketDB`"""
         self.next_date = datetime(2022, 7, 15)
         self.db = BlanketDB(':memory:', lambda: self.next_date)
+        self.app = TestApp(self.db)
 
     def tearDown(self):
         """Tear down test fixtures, if any."""
@@ -88,25 +89,29 @@ class TestBlanketdb(unittest.TestCase):
         self.db.delete()
         self.assertEqual(0, len(list(self.db)))
 
-    def test_web_requests(self):
-        app = TestApp(self.db)
-        resp = app.get('/', status=200)
+    def test_basic_web_requests(self):
+        '''Test basic web requests'''
+        resp = self.app.get('/', status=200)
         self.assertEqual(0, len(resp.json['entries']))
-        app.get('/_entry/123', status=404)
-        app.get('/_entry/', status=400)
-        # method not allowed
-        app.post('/_entry', status=405)
-        app.post('/_entry/123', status=405)
-        app.put('/_entry/', status=405)
-        app.put('/_entry/123', status=405)
-        app.put('/anything', status=405)
-        # create entries
-        app.post('/', status=201)
-        app.post('/otherbucket', status=201)
-        app.post('/', dict(a=1), status=201)  # post form
-        app.post_json('/', dict(a=1), status=201)  # post json
-        self.assertEqual(4, len(app.get('/', status=200).json['entries']))
-        self.assertEqual(1, len(app.get('/otherbucket', status=200)
-                                   .json['entries']))
-        self.assertEqual(3, len(app.get('/default', status=200)
-                                   .json['entries']))
+        self.app.get('/_entry/123', status=404)
+        self.app.get('/_entry/', status=400)
+
+    def test_method_not_allowed_requests(self):
+        '''Test several method/route combinations which are not allowed'''
+        self.app.post('/_entry', status=405)
+        self.app.post('/_entry/123', status=405)
+        self.app.put('/_entry/', status=405)
+        self.app.put('/_entry/123', status=405)
+        self.app.put('/anything', status=405)
+
+    def test_create_entry_requests(self):
+        '''Test entry creation by request'''
+        self.app.post('/', status=201)
+        self.app.post('/otherbucket', status=201)
+        self.app.post('/', dict(a=1), status=201)  # post form
+        self.app.post_json('/', dict(a=1), status=201)  # post json
+        self.assertEqual(4, len(self.app.get('/', status=200).json['entries']))
+        self.assertEqual(1, len(self.app.get('/otherbucket', status=200)
+                                        .json['entries']))
+        self.assertEqual(3, len(self.app.get('/default', status=200)
+                                        .json['entries']))
