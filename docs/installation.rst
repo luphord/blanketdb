@@ -49,3 +49,12 @@ Once you have a copy of the source, you can install it with:
 
 .. _Github repo: https://github.com/luphord/blanketdb
 .. _tarball: https://github.com/luphord/blanketdb/tarball/master
+
+
+Single File
+-----------
+
+BlanketDB has no dependencies besides the Python standard library.
+You can also just grab blanketdb.py_ and drop it into your project.
+
+.. _blanketdb.py: https://github.com/luphord/blanketdb/blanketdb.py
