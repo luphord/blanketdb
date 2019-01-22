@@ -339,3 +339,22 @@ class BlanketDB:
             start_json_response(405)
             yield _j(message='The HTTP method is not allowed for this path',
                      path=path, method=method)
+
+
+if __name__ == '__main__':
+    from argparse import ArgumentParser
+    parser = ArgumentParser(description='Start a BlanketDB instance ' +
+                                        'using wsgiref.simple_server.')
+    parser.add_argument('-i', '--interface', help='Interface to listen on',
+                        default='localhost', type=str)
+    parser.add_argument('-p', '--port', help='Port to listen on',
+                        default=8080, type=int)
+    parser.add_argument('-f', '--file', help='Database file to use',
+                        default='db.sqlite', type=str)
+    args = parser.parse_args()
+    from wsgiref.simple_server import make_server
+    msg = 'Starting BlanketDB at http://{interface}:{port} using ' + \
+          'database file "{file}"'
+    print(msg.format_map(vars(args)))
+    httpd = make_server(args.interface, args.port, BlanketDB(args.file))
+    httpd.serve_forever()
