@@ -8,6 +8,7 @@ Welcome to BlanketDB's documentation!
    readme
    installation
    usage
+   webinterface
    modules
    contributing
    authors

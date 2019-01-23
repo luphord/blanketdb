@@ -3,7 +3,7 @@ Usage
 =====
 
 Command line
------------
+------------
 
 To use BlanketDB as a standalone database (and communicate over HTTP), enter the following command:
 
