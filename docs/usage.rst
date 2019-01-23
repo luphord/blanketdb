@@ -2,6 +2,9 @@
 Usage
 =====
 
+Command line
+-----------
+
 To use BlanketDB as a standalone database (and communicate over HTTP), enter the following command:
 
 .. code-block:: console
@@ -25,6 +28,10 @@ The following command line options are available:
                             Interface to listen on
     -p PORT, --port PORT  Port to listen on
     -f FILE, --file FILE  Database file to use
+
+
+Python
+------
 
 To use BlanketDB in a project, enter the following Python code::
 
