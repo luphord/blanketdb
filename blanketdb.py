@@ -5,7 +5,7 @@
 
 __author__ = 'luphord'
 __email__ = 'luphord@protonmail.com'
-__version__ = '0.2.0'
+__version__ = '0.2.1'
 
 import json
 import sqlite3
