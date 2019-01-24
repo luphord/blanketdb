@@ -50,6 +50,50 @@ If you want to store to a bucket named `mybucket`, post to this URL:
 
     POST http://localhost:8080/mybucket
 
+Retrieve entries
+----------------
+
+To retrieve an individual entry using its ID (e.g. 123), use the following request:
+
+.. code-block:: console
+
+    GET http://localhost:8080/_entry/123
+
+BlanketDB will answer with a response similar to the post request above:
+
+.. code-block:: json
+
+    {
+        "id": 123,
+        "bucket": "default",
+        "timestamp": "2019-01-24T06:31:36.328127",
+        "data": {
+            "a": 1.23,
+            "test": "somedata"
+        }
+    }
+
+If no entry with the given ID exists, BlanketDB will respond with a `404 Not found`
+HTTP error code. Note that you do not specify the bucket of the entry in the URL.
+IDs are unique across all buckets in BlanketDB.
+
+The response above shows the data stored in entry 123 as well as corresponding
+metadata such as `timestamp` (of creation) and `bucket`. In order to make BlanketDB
+omit any metadata use
+
+.. code-block:: console
+
+    GET http://localhost:8080/_entry/123?meta=false
+
+which will result in this reponse:
+
+.. code-block:: json
+
+    {
+        "a": 1.23,
+        "test": "somedata"
+    }
+
 Query database
 --------------
 
