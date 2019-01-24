@@ -184,7 +184,51 @@ which will result in:
         ]
     }
 
-TODO: limit, newest_first, more examples
+If you want to limit the number of entries retrieved, you can specify the `limit` parameter.
+In this context you will likely want to specify whether you are interested
+in the oldest or newest entries. To query the latest 3 entries in `mybucket`, use
+the following request (without metadata for brevity)
+
+.. code-block:: console
+
+    GET http://localhost:8080/mybucket?meta=false&limit=3&newest_first=true
+
+which will result in something like this:
+
+.. code-block:: json
+
+    {
+        "bucket_requested": "mybucket",
+        "since_id": 0,
+        "since": null,
+        "before_id": null,
+        "before": null,
+        "number_of_entries": 3,
+        "last_id": 6,
+        "limit": 3,
+        "newest_first": true,
+        "entries": [
+            {
+                "b": 1.23,
+                "test": "somedata2"
+            },
+            {
+                "b": 1.23,
+                "test": "somedata2"
+            },
+            {
+                "b": 1.23,
+                "test": "somedata2"
+            }
+        ]
+    }
+
+If `newest_first` is not specified, it will default to `true` (hence the example
+above would work without `newest_first`).
+
+In order to paginate entries you can use a combination of `since_id` and `limit`.
+For each subsequent request you would read the `last_id` field of the response,
+icrement by 1 and then use that number as the new `since_id`.
 
 Delete entries
 --------------
