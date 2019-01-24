@@ -233,4 +233,29 @@ icrement by 1 and then use that number as the new `since_id`.
 Delete entries
 --------------
 
-TODO
+You can delete individual entries using the following request (for entry 123):
+
+.. code-block:: console
+
+    DELETE http://localhost:8080/_entry/123
+
+In addition, you can apply the query filters above when deleting entries.
+For example, to delete all entries before today you would use the request:
+
+.. code-block:: console
+
+    DELETE http://localhost:8080/?before=today
+
+BlanketDB will respond with the usual query metadata and a field containing
+the number of entries deleted:
+
+.. code-block:: json
+
+    {
+        "bucket_requested": null,
+        "since_id": 0,
+        "since": null,
+        "before_id": null,
+        "before": "2019-01-24",
+        "number_of_entries_deleted": 3
+    }
