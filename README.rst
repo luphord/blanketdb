@@ -27,7 +27,7 @@ There is no schema in the database, you simply store objects in buckets.
 
 
 BlanketDB is free software provided under a MIT license.
-Documentation is available https://blanketdb.readthedocs.io.
+Documentation is available at https://blanketdb.readthedocs.io.
 
 
 Features
@@ -42,6 +42,44 @@ Features
 * Data is stored in a single file on the file system which is a SQLite database
 * BlanketDB is a single Python file without any dependencies besides the standard library
 * No sequrity whatsoever; BlanketDB is completely open to readers and writers (use with care!)
+
+Quickstart
+----------
+
+To install BlanketDB, you'll need a Python (>=3.4) installation with pip:
+
+.. code-block:: console
+
+    $ pip install blanketdb
+
+To use BlanketDB as a standalone database (and communicate over HTTP), enter the following command:
+
+.. code-block:: console
+
+    $ python3 -m blanketdb -i localhost -p 8080 -f /path/to/db.sqlite
+
+BlanketDB will now serve its web interface at http://localhost:8080.
+You can open this page in your browser to check if everything works.
+
+To use BlanketDB in a Python project, enter the following code:
+
+.. code-block:: python
+
+    from blanketdb import BlanketDB
+    db = BlanketDB('/path/to/db.sqlite')
+
+    # you can now use db using its Python API
+    db.store_dict(x='test')['id']
+    for entry in db:
+        print(entry)
+
+    # db is alse a wsgi conforming callable
+    # you can use it e.g. with the wsgi reference implementation
+    from wsgiref.simple_server import make_server
+    httpd = make_server('localhost', 8080, db)
+    httpd.serve_forever()
+
+Detailed documentation is available at https://blanketdb.readthedocs.io.
 
 Credits
 -------

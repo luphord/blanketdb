@@ -33,7 +33,9 @@ The following command line options are available:
 Python
 ------
 
-To use BlanketDB in a project, enter the following Python code::
+To use BlanketDB in a project, enter the following Python code:
+
+.. code-block:: python
 
     from blanketdb import BlanketDB
     db = BlanketDB('/path/to/db.sqlite')
