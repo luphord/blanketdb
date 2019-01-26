@@ -341,7 +341,7 @@ class BlanketDB:
                      path=path, method=method)
 
 
-if __name__ == '__main__':
+def cli():
     from argparse import ArgumentParser
     parser = ArgumentParser(description='Start a BlanketDB instance ' +
                                         'using wsgiref.simple_server.')
@@ -358,3 +358,7 @@ if __name__ == '__main__':
     print(msg.format_map(vars(args)))
     httpd = make_server(args.interface, args.port, BlanketDB(args.file))
     httpd.serve_forever()
+
+
+if __name__ == '__main__':
+    cli()
