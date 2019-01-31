@@ -14,9 +14,7 @@ BlanketDB
         :alt: Documentation Status
 
 
-
-
-BlanketDB is a very simple database written in Python based on SQLite.
+BlanketDB_ is a very simple database written in Python based on SQLite.
 It is intended for small IoT projects where you need a quick way to
 collect and store data from sensors and other devices.
 You communicate to BlanketDB using HTTP GET / POST / DELETE requests.
@@ -24,10 +22,15 @@ Request and response bodies are usually JSON, but you can also POST
 HTML forms directly to BlanketDB.
 There is no schema in the database, you simply store objects in buckets.
 
-
-
 BlanketDB is free software provided under a MIT license.
 Documentation is available at https://blanketdb.readthedocs.io.
+
+Why is it called BlanketDB? Well, a blanket_ is simple, lightweight, portable
+and keeps you warm. But if you really want to relax, you'll need a couch_.
+
+.. _BlanketDB: https://github.com/luphord/blanketdb
+.. _blanket: https://github.com/luphord/blanketdb
+.. _couch: http://couchdb.apache.org/
 
 
 Features
