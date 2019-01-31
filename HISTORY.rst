@@ -2,8 +2,8 @@
 History
 =======
 
-0.2.2 (not yet)
----------------
+0.2.2 (2019-01-31)
+------------------
 
 * setuptools entrypoint for cli
 * quickstart documentation
