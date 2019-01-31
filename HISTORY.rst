@@ -7,6 +7,7 @@ History
 
 * setuptools entrypoint for cli
 * quickstart documentation
+* added logo
 
 0.2.1 (2019-01-24)
 ------------------
