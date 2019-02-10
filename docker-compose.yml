@@ -1,0 +1,19 @@
+version: '2'
+
+services:
+  blanketdb:
+    image: luphord/blanketdb:0.2.2
+    build:
+      context: .
+    volumes:
+      - /tmp/db:/usr/src/app/db
+
+  nginx:
+    image: nginx:1.15-alpine
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./html:/usr/share/nginx/html:ro
+    depends_on:
+      - blanketdb
+    ports:
+      - 80:80
