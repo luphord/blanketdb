@@ -185,7 +185,7 @@ class BlanketDB:
                 yield dict(id=id, bucket=bucket,
                            timestamp=timestamp, data=json.loads(data))
 
-    def __iter__(self):
+    def __iter__(self) -> Iterable[Dict[str, Any]]:
         '''Iterate over all entries stored in this `BlanketDB` instance.'''
         with self.connection as conn:
             c = conn.execute('SELECT rowid, * FROM blanketdb;')
@@ -193,21 +193,22 @@ class BlanketDB:
                 yield dict(id=id, bucket=bucket,
                            timestamp=timestamp, data=json.loads(data))
 
-    def __delitem__(self, entry_id):
+    def __delitem__(self, entry_id: int) -> None:
         '''Delete an entry by its `entry_id`.'''
         with self.connection as conn:
             conn.execute('DELETE FROM blanketdb WHERE rowid=?;', (entry_id,))
 
-    def delete(self, bucket=None,
-               since_id=0, since='',
-               before_id=None, before=None):
+    def delete(self, bucket: str=None,
+               since_id: int=0, since: Union[str, datetime, date]='',
+               before_id: int=None, before: Union[str, datetime, date]=None) \
+            -> None:
         '''Delete entries from this `BlanketDB` instance
            using various filters. `since` and `since_id` are inclusive,
            `before` and `before` are exclusive regarding the specified value.
         '''
         is_bucket_requested = bool(bucket)
         if is_bucket_requested:
-            bucket = bucket.lower()
+            bucket = bucket.lower() if bucket else ''
         since = _parse_dt(since)
         before = _parse_dt(before)
         with self.connection as conn:
@@ -348,7 +349,7 @@ class BlanketDB:
                      path=path, method=method)
 
 
-def cli():
+def cli() -> None:
     from argparse import ArgumentParser
     parser = ArgumentParser(description='Start a BlanketDB instance ' +
                                         'using wsgiref.simple_server.')
