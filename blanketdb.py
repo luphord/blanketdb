@@ -11,11 +11,12 @@ import json
 import sqlite3
 import urllib.parse
 from datetime import datetime, date, timedelta
+from typing import Dict, Union, Any, Callable, Iterable
 
 
-def _parse_form(form_s):
+def _parse_form(form_s: str) -> Dict[str, object]:
     '''Parse url encoded form and convert numerical types.'''
-    d = dict()
+    d = dict()  # type: Dict[str, object]
     for k, v in urllib.parse.parse_qsl(form_s):
         try:
             d[k] = int(v)
@@ -32,7 +33,8 @@ def _parse_form(form_s):
     return d
 
 
-def _parse_dt(s):
+def _parse_dt(s: Union[str, datetime, date, None]) \
+        -> Union[str, datetime, date]:
     '''Parse string using custom differential date formats like "2 days".'''
     if not s:
         return ''
@@ -74,18 +76,18 @@ def _parse_dt(s):
     return s
 
 
-def _json_default(obj):
+def _json_default(obj: Union[datetime, date]) -> str:
     if isinstance(obj, datetime) or isinstance(obj, date):
         return obj.isoformat()
     raise TypeError(type(obj))
 
 
-def _serialize_json(data, indent=2):
+def _serialize_json(data: Any, indent: Union[int, None]=2) -> str:
     '''Serialize to json supporting dates.'''
     return json.dumps(data, indent=indent, default=_json_default)
 
 
-def _j(obj_to_serialize=None, **kwargs):
+def _j(obj_to_serialize: Any=None, **kwargs: Dict[str, Any]) -> bytes:
     '''Serialize `obj_to_serialize` or keyword arguments as dict to json
        and encode to bytes.'''
     if obj_to_serialize is None:
@@ -112,7 +114,9 @@ class BlanketDB:
              ' ORDER BY (? * rowid) DESC LIMIT ?;'
     _DELETE = 'DELETE ' + _SOURCE + ';'
 
-    def __init__(self, connection_string, now=datetime.now):
+    def __init__(self,
+                 connection_string: str,
+                 now: Callable[[], datetime]=datetime.now) -> None:
         '''Initialize `BlanketDB` instance using a `connection_string`
            that can be understood by SQLite. `now` should be a function
            returning the current datetime (or a suitable test replacement).
@@ -124,7 +128,7 @@ class BlanketDB:
                          '(bucket text, timestamp timestamp, data text);')
         self.now = now
 
-    def store(self, data, bucket='default'):
+    def store(self, data: Any, bucket: str='default') -> Dict[str, Any]:
         '''Serialize `data` to json and store it under `bucket`.'''
         entry_id = None
         bucket = bucket.lower()
@@ -137,11 +141,13 @@ class BlanketDB:
         return dict(id=entry_id, bucket=bucket,
                     timestamp=timestamp.isoformat(), data=data)
 
-    def store_dict(self, bucket='default', **kwargs):
+    def store_dict(self,
+                   bucket: str='default',
+                   **kwargs: Dict[str, Any]) -> Dict[str, Any]:
         '''Serialize key word args to json and store under `bucket`.'''
         return self.store(kwargs, bucket)
 
-    def __getitem__(self, entry_id):
+    def __getitem__(self, entry_id: int) -> Union[Dict[str, Any], None]:
         '''Get a stored entry by its `entry_id`.
            Return None if no entry exists for that ID.
         '''
@@ -156,16 +162,17 @@ class BlanketDB:
             else:
                 return None
 
-    def query(self, bucket=None,
-              since_id=0, since='',
-              before_id=None, before=None,
-              limit=-1, newest_first=True):
+    def query(self, bucket: str=None,
+              since_id: int=0, since: Union[str, datetime, date]='',
+              before_id: int=None, before: Union[str, datetime, date]=None,
+              limit: int=-1, newest_first: bool=True) \
+            -> Iterable[Dict[str, Any]]:
         '''Query this `BlanketDB` instance using various optional filters.
            `since` and `since_id` are inclusive, `before` and `before` are
            exclusive regarding the specified value.'''
         is_bucket_requested = bool(bucket)
         if is_bucket_requested:
-            bucket = bucket.lower()
+            bucket = bucket.lower() if bucket else ''
         since = _parse_dt(since)
         before = _parse_dt(before)
         with self.connection as conn:
