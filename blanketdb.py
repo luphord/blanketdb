@@ -11,7 +11,12 @@ import json
 import sqlite3
 import urllib.parse
 from datetime import datetime, date, timedelta
-from typing import Dict, Union, Any, Callable, Iterable
+from typing import Dict, Union, Any, Callable, Iterable, List, Optional
+
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from wsgiref.types import StartResponse
+    print(StartResponse)
 
 
 def _parse_form(form_s: str) -> Dict[str, object]:
@@ -82,12 +87,12 @@ def _json_default(obj: Union[datetime, date]) -> str:
     raise TypeError(type(obj))
 
 
-def _serialize_json(data: Any, indent: Union[int, None]=2) -> str:
+def _serialize_json(data: Any, indent: Optional[int]=2) -> str:
     '''Serialize to json supporting dates.'''
     return json.dumps(data, indent=indent, default=_json_default)
 
 
-def _j(obj_to_serialize: Any=None, **kwargs: Dict[str, Any]) -> bytes:
+def _j(obj_to_serialize: Any=None, **kwargs: Any) -> bytes:
     '''Serialize `obj_to_serialize` or keyword arguments as dict to json
        and encode to bytes.'''
     if obj_to_serialize is None:
@@ -163,8 +168,10 @@ class BlanketDB:
                 return None
 
     def query(self, bucket: str=None,
-              since_id: int=0, since: Union[str, datetime, date]='',
-              before_id: int=None, before: Union[str, datetime, date]=None,
+              since_id: Optional[int]=0,
+              since: Union[str, datetime, date]='',
+              before_id: Optional[int]=None,
+              before: Union[str, datetime, date]=None,
               limit: int=-1, newest_first: bool=True) \
             -> Iterable[Dict[str, Any]]:
         '''Query this `BlanketDB` instance using various optional filters.
@@ -199,9 +206,11 @@ class BlanketDB:
             conn.execute('DELETE FROM blanketdb WHERE rowid=?;', (entry_id,))
 
     def delete(self, bucket: str=None,
-               since_id: int=0, since: Union[str, datetime, date]='',
-               before_id: int=None, before: Union[str, datetime, date]=None) \
-            -> None:
+               since_id: Optional[int]=0,
+               since: Union[str, datetime, date]='',
+               before_id: Optional[int]=None,
+               before: Union[str, datetime, date]=None) \
+            -> Any:
         '''Delete entries from this `BlanketDB` instance
            using various filters. `since` and `since_id` are inclusive,
            `before` and `before` are exclusive regarding the specified value.
@@ -217,28 +226,42 @@ class BlanketDB:
                          not before_id, before_id, not before, before))
             return conn.execute('select changes();').fetchone()[0]
 
-    def __call__(self, env, start_response):
+    def __call__(self,
+                 env: Dict[str, Any],
+                 start_response: 'StartResponse') \
+            -> Iterable[bytes]:
         '''WSGI conform callable method.'''
-        def start_json_response(status,
-                                headers=[('Content-Type',
-                                          'application/json')]):
+        def start_json_response(status: int,
+                                headers: List[Any]=[('Content-Type',
+                                                     'application/json')]) \
+                -> None:
             start_response(_HTTP_STATUS_CODES[status], headers)
 
-        path = (env['PATH_INFO'] or '/').lower()
-        method = env['REQUEST_METHOD'].upper()
-        qs = _parse_form(env['QUERY_STRING'])
+        path = (str(env['PATH_INFO']) or '/').lower()
+        method = str(env['REQUEST_METHOD']).upper()
+        qs = _parse_form(str(env['QUERY_STRING']))
         try:
             show_meta = qs.get('meta', True)
             since_id = qs.get('since_id', 0)
+            since_id = int(since_id) \
+                if isinstance(since_id, (int, str)) \
+                else None
             before_id = qs.get('before_id', None)
-            since = _parse_dt(qs.get('since', None))
-            before = _parse_dt(qs.get('before', None))
-            limit = int(qs.get('limit', -1))
+            before_id = int(before_id) \
+                if isinstance(before_id, (int, str)) \
+                else None
+            since = qs.get('since', None)
+            assert since is None or isinstance(since, (str, datetime, date))
+            since = _parse_dt(since)
+            before = qs.get('before', None)
+            assert before is None or isinstance(before, (str, datetime, date))
+            before = _parse_dt(before)
+            limit = int(str(qs.get('limit', -1)))
             newest_first = bool(qs.get('newest_first', True))
-        except Exception:
+        except Exception as e:
             start_json_response(400)
             yield _j(message='An error occured while' +
-                             ' parsing the query parameters',
+                             ' parsing the query parameters: ' + str(e),
                      parameters=qs)
             return
 
@@ -261,7 +284,7 @@ class BlanketDB:
                     yield _j(message='Entry does not exist', id=entry_id)
             else:
                 start_json_response(200)
-                bucket = path[1:]
+                bucket = path[1:]  # type: Optional[str]
                 if not bucket:
                     bucket = None  # make it a little more explicit
                 entries = list(self.query(bucket, since_id, since,
