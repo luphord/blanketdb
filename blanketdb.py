@@ -168,7 +168,7 @@ class BlanketDB:
 
     def query(self, bucket: str=None,
               since_id: Optional[int]=0,
-              since: Optional[DateLike]='',
+              since: Optional[DateLike]=None,
               before_id: Optional[int]=None,
               before: Optional[DateLike]=None,
               limit: int=-1, newest_first: bool=True) \
@@ -206,7 +206,7 @@ class BlanketDB:
 
     def delete(self, bucket: str=None,
                since_id: Optional[int]=0,
-               since: Optional[DateLike]='',
+               since: Optional[DateLike]=None,
                before_id: Optional[int]=None,
                before: Optional[DateLike]=None) \
             -> Any:
