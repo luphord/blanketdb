@@ -2,11 +2,11 @@
 History
 =======
 
-0.3 (not yet):
---------------
+0.3 (2019-05-06)
+----------------
 
 * Type annotations for `BlanketDB`
-* Python 3.4 is supported anymore (as it does not know type annotations)
+* Python 3.4 is not supported anymore (as it does not know type annotations)
 
 0.2.2 (2019-01-31)
 ------------------
