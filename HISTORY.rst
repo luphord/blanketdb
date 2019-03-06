@@ -2,7 +2,7 @@
 History
 =======
 
-0.3 (2019-05-06)
+0.3 (2019-03-06)
 ----------------
 
 * Type annotations for `BlanketDB`
