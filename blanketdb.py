@@ -15,8 +15,7 @@ from typing import Dict, Union, Any, Callable, Iterable, List, Optional
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from wsgiref.types import StartResponse
-    print(StartResponse)
+    from wsgiref.types import StartResponse  # noqa: F401
 DateLike = Union[str, datetime, date]
 
 
