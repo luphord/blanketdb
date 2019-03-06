@@ -17,11 +17,12 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from wsgiref.types import StartResponse
     print(StartResponse)
+DateLike = Union[str, datetime, date]
 
 
-def _parse_form(form_s: str) -> Dict[str, object]:
+def _parse_form(form_s: str) -> Dict[str, Any]:
     '''Parse url encoded form and convert numerical types.'''
-    d = dict()  # type: Dict[str, object]
+    d = dict()  # type: Dict[str, Any]
     for k, v in urllib.parse.parse_qsl(form_s):
         try:
             d[k] = int(v)
@@ -38,8 +39,7 @@ def _parse_form(form_s: str) -> Dict[str, object]:
     return d
 
 
-def _parse_dt(s: Union[str, datetime, date, None]) \
-        -> Union[str, datetime, date]:
+def _parse_dt(s: Optional[DateLike]) -> DateLike:
     '''Parse string using custom differential date formats like "2 days".'''
     if not s:
         return ''
@@ -152,7 +152,7 @@ class BlanketDB:
         '''Serialize key word args to json and store under `bucket`.'''
         return self.store(kwargs, bucket)
 
-    def __getitem__(self, entry_id: int) -> Union[Dict[str, Any], None]:
+    def __getitem__(self, entry_id: int) -> Optional[Dict[str, Any]]:
         '''Get a stored entry by its `entry_id`.
            Return None if no entry exists for that ID.
         '''
@@ -169,9 +169,9 @@ class BlanketDB:
 
     def query(self, bucket: str=None,
               since_id: Optional[int]=0,
-              since: Union[str, datetime, date]='',
+              since: Optional[DateLike]='',
               before_id: Optional[int]=None,
-              before: Union[str, datetime, date]=None,
+              before: Optional[DateLike]=None,
               limit: int=-1, newest_first: bool=True) \
             -> Iterable[Dict[str, Any]]:
         '''Query this `BlanketDB` instance using various optional filters.
@@ -207,9 +207,9 @@ class BlanketDB:
 
     def delete(self, bucket: str=None,
                since_id: Optional[int]=0,
-               since: Union[str, datetime, date]='',
+               since: Optional[DateLike]='',
                before_id: Optional[int]=None,
-               before: Union[str, datetime, date]=None) \
+               before: Optional[DateLike]=None) \
             -> Any:
         '''Delete entries from this `BlanketDB` instance
            using various filters. `since` and `since_id` are inclusive,
