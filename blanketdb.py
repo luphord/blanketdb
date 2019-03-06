@@ -167,7 +167,7 @@ class BlanketDB:
                 return None
 
     def query(self, bucket: str=None,
-              since_id: Optional[int]=0,
+              since_id: Optional[int]=None,
               since: Optional[DateLike]=None,
               before_id: Optional[int]=None,
               before: Optional[DateLike]=None,
@@ -179,6 +179,8 @@ class BlanketDB:
         is_bucket_requested = bool(bucket)
         if is_bucket_requested:
             bucket = bucket.lower() if bucket else ''
+        if since_id is None:
+            since_id = 0
         since = _parse_dt(since)
         before = _parse_dt(before)
         with self.connection as conn:
@@ -205,7 +207,7 @@ class BlanketDB:
             conn.execute('DELETE FROM blanketdb WHERE rowid=?;', (entry_id,))
 
     def delete(self, bucket: str=None,
-               since_id: Optional[int]=0,
+               since_id: Optional[int]=None,
                since: Optional[DateLike]=None,
                before_id: Optional[int]=None,
                before: Optional[DateLike]=None) \
@@ -217,6 +219,8 @@ class BlanketDB:
         is_bucket_requested = bool(bucket)
         if is_bucket_requested:
             bucket = bucket.lower() if bucket else ''
+        if since_id is None:
+            since_id = 0
         since = _parse_dt(since)
         before = _parse_dt(before)
         with self.connection as conn:
