@@ -6,39 +6,10 @@
 
 import unittest
 from datetime import datetime, timedelta
-import json
 
 from webtest import TestApp
-import requests
 
 from blanketdb import BlanketDB
-
-
-class ActualApiAdapter:
-
-    def __init__(self, base_url):
-        self.base_url = base_url.rstrip('/') + '/'
-
-    def perform_request(self, method, path, *args, **kwargs):
-        response = method(self.base_url + path, *args, **kwargs)
-        response.json = response.json()
-        return response
-
-    def get(self, path, status=200):
-        return self.perform_request(requests.get, path)
-
-    def post(self, path, body=None, status=200):
-        return self.perform_request(requests.post, path, body)
-
-    def post_json(self, path, body=None, status=200):
-        body = json.dumps(body)
-        return self.perform_request(requests.post, path, body)
-
-    def put(self, path, body=None, status=200):
-        return self.perform_request(requests.put, path, body)
-
-    def delete(self, path, status=200):
-        return self.perform_request(requests.delete, path)
 
 
 class TestBlanketDBHttpApi(unittest.TestCase):
@@ -47,10 +18,7 @@ class TestBlanketDBHttpApi(unittest.TestCase):
     def setUp(self):
         self.next_date = datetime(2022, 7, 15)
         self.db = BlanketDB(':memory:', lambda: self.next_date)
-        do_actual_api_calls = False
-        self.app = ActualApiAdapter(base_url='http://localhost:8080') \
-            if do_actual_api_calls \
-            else TestApp(self.db)
+        self.app = TestApp(self.db)
 
     def tearDown(self):
         pass
