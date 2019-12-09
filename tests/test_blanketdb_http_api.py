@@ -14,7 +14,7 @@ import requests
 from blanketdb import BlanketDB
 
 
-class ActualApiAdapeter:
+class ActualApiAdapter:
 
     def __init__(self, base_url):
         self.base_url = base_url.rstrip('/') + '/'
@@ -48,7 +48,7 @@ class TestBlanketDBHttpApi(unittest.TestCase):
         self.next_date = datetime(2022, 7, 15)
         self.db = BlanketDB(':memory:', lambda: self.next_date)
         do_actual_api_calls = False
-        self.app = ActualApiAdapeter(base_url='http://localhost:8080') \
+        self.app = ActualApiAdapter(base_url='http://localhost:8080') \
             if do_actual_api_calls \
             else TestApp(self.db)
 
