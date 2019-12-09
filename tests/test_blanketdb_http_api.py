@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""Tests for `blanketdb` module."""
+'''Test HTTP API of BlanketDB.'''
 
 
 import unittest
@@ -41,11 +41,10 @@ class ActualApiAdapeter:
         return self.perform_request(requests.delete, path)
 
 
-class TestBlanketdb(unittest.TestCase):
-    """Tests for `blanketdb` package."""
+class TestBlanketDBHttpApi(unittest.TestCase):
+    '''Test HTTP API of BlanketDB.'''
 
     def setUp(self):
-        """Set up test instance of `BlanketDB`"""
         self.next_date = datetime(2022, 7, 15)
         self.db = BlanketDB(':memory:', lambda: self.next_date)
         do_actual_api_calls = False
@@ -54,7 +53,7 @@ class TestBlanketdb(unittest.TestCase):
             else TestApp(self.db)
 
     def tearDown(self):
-        """Tear down test fixtures, if any."""
+        pass
 
     def test_storing_from_python(self):
         '''Test storing of data using Python API'''
