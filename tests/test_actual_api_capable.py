@@ -19,10 +19,11 @@ class ActualApiAdapter:
     def __init__(self, base_url):
         self.base_url = base_url.rstrip('/') + '/'
 
-    def perform_request(self, method, path, *args, **kwargs):
+    def perform_request(self, method, path, body=None):
         headers = {'Content-type': 'application/json'}
-        response = method(self.base_url + path, *args,
-                          headers=headers, **kwargs)
+        body = json.dumps(body) if body else None
+        response = method(self.base_url + path,
+                          headers=headers)
         response.json = response.json()
         return response
 
@@ -33,7 +34,6 @@ class ActualApiAdapter:
         return self.perform_request(requests.post, path, body)
 
     def post_json(self, path, body=None, status=200):
-        body = json.dumps(body)
         return self.perform_request(requests.post, path, body)
 
     def put(self, path, body=None, status=200):
