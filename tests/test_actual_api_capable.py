@@ -27,7 +27,7 @@ class ActualApiAdapter:
         response.json = response.json()
         return response
 
-    def get(self, path, status=200):
+    def get(self, path, body=None, status=200):
         return self.perform_request(requests.get, path)
 
     def post(self, path, body=None, status=200):
@@ -39,7 +39,7 @@ class ActualApiAdapter:
     def put(self, path, body=None, status=200):
         return self.perform_request(requests.put, path, body)
 
-    def delete(self, path, status=200):
+    def delete(self, path, body=None, status=200):
         return self.perform_request(requests.delete, path)
 
 
