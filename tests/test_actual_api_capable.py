@@ -17,7 +17,7 @@ from blanketdb import BlanketDB
 class ActualApiAdapter:
 
     def __init__(self, base_url):
-        self.base_url = base_url.rstrip('/') + '/'
+        self.base_url = base_url.rstrip('/')
 
     def perform_request(self, method, path, body=None):
         headers = {'Content-type': 'application/json'}
