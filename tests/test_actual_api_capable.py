@@ -83,11 +83,12 @@ class TestBlanketDBActualHttpApiCapable(unittest.TestCase):
         self.app.post('/otherbucket', status=201)
         self.app.post('/', dict(a=1), status=201)  # post form
         self.app.post_json('/', dict(a=1), status=201)  # post json
-        self.assertEqual(4, len(self.app.get('/', status=200).json['entries']))
-        self.assertEqual(1, len(self.app.get('/otherbucket', status=200)
-                                        .json['entries']))
-        self.assertEqual(3, len(self.app.get('/default', status=200)
-                                        .json['entries']))
+        self.assertGreaterEqual(
+            len(self.app.get('/', status=200).json['entries']), 4)
+        self.assertGreaterEqual(
+            len(self.app.get('/otherbucket', status=200).json['entries']), 1)
+        self.assertGreaterEqual(
+            len(self.app.get('/default', status=200).json['entries']), 3)
 
     def test_query_requests(self):
         '''Test querying'''
