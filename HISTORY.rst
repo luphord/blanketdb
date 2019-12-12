@@ -2,6 +2,12 @@
 History
 =======
 
+0.3.3 (2019-12-12)
+------------------
+
+* Split tests into Python and HTTP API tests
+* Added tests that can be executed against an actual HTTP API of `BlanketDB`
+
 0.3.2 (2019-12-04)
 ------------------
 
