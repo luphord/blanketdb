@@ -18,34 +18,36 @@ class ActualApiAdapter:
     def __init__(self, base_url):
         self.base_url = base_url.rstrip('/')
 
-    def perform_query_string_request(self, method, path, params):
+    def request_qs(self, method, path, params, exptected_status):
         headers = {'Content-type': 'application/json'}
         response = method(self.base_url + path,
                           headers=headers, params=params)
         response.json = response.json()
+        assert response.status_code == exptected_status
         return response
 
-    def perform_body_request(self, method, path, body):
+    def request_body(self, method, path, body, exptected_status):
         headers = {'Content-type': 'application/json'}
         response = method(self.base_url + path,
                           headers=headers, json=body)
         response.json = response.json()
+        assert response.status_code == exptected_status
         return response
 
     def get(self, path, params=None, status=200):
-        return self.perform_query_string_request(requests.get, path, params)
+        return self.request_qs(requests.get, path, params, status)
 
     def post(self, path, body=None, status=200):
-        return self.perform_body_request(requests.post, path, body)
+        return self.request_body(requests.post, path, body, status)
 
     def post_json(self, path, body=None, status=200):
-        return self.perform_body_request(requests.post, path, body)
+        return self.request_body(requests.post, path, body, status)
 
     def put(self, path, body=None, status=200):
-        return self.perform_body_request(requests.put, path, body)
+        return self.request_body(requests.put, path, body, status)
 
     def delete(self, path, params=None, status=200):
-        return self.perform_query_string_request(requests.delete, path, params)
+        return self.request_qs(requests.delete, path, params, status)
 
 
 class TestBlanketDBActualHttpApiCapable(unittest.TestCase):
@@ -57,7 +59,7 @@ class TestBlanketDBActualHttpApiCapable(unittest.TestCase):
     def setUp(self):
         self.next_date = datetime(2022, 7, 15)
         self.db = BlanketDB(':memory:', lambda: self.next_date)
-        do_actual_api_calls = True
+        do_actual_api_calls = False
         self.app = ActualApiAdapter(base_url='http://localhost:8080') \
             if do_actual_api_calls \
             else TestApp(self.db)
