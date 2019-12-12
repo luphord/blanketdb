@@ -2,7 +2,7 @@ version: '2'
 
 services:
   blanketdb:
-    image: luphord/blanketdb:0.2.2
+    image: luphord/blanketdb:0.3.3
     build:
       context: .
     volumes:
