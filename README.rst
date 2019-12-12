@@ -13,6 +13,8 @@ BlanketDB
         :target: https://blanketdb.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status
 
+.. image:: https://img.shields.io/docker/cloud/build/luphord/blanketdb
+        :alt: Docker Automated build
 
 BlanketDB_ is a very simple database written in Python based on SQLite.
 It is intended for small IoT projects where you need a quick way to
