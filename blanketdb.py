@@ -86,12 +86,12 @@ def _json_default(obj: Union[datetime, date]) -> str:
     raise TypeError(type(obj))
 
 
-def _serialize_json(data: Any, indent: Optional[int]=2) -> str:
+def _serialize_json(data: Any, indent: Optional[int] = 2) -> str:
     '''Serialize to json supporting dates.'''
     return json.dumps(data, indent=indent, default=_json_default)
 
 
-def _j(obj_to_serialize: Any=None, **kwargs: Any) -> bytes:
+def _j(obj_to_serialize: Any = None, **kwargs: Any) -> bytes:
     '''Serialize `obj_to_serialize` or keyword arguments as dict to json
        and encode to bytes.'''
     if obj_to_serialize is None:
@@ -120,7 +120,7 @@ class BlanketDB:
 
     def __init__(self,
                  connection_string: str,
-                 now: Callable[[], datetime]=datetime.now) -> None:
+                 now: Callable[[], datetime] = datetime.now) -> None:
         '''Initialize `BlanketDB` instance using a `connection_string`
            that can be understood by SQLite. `now` should be a function
            returning the current datetime (or a suitable test replacement).
@@ -132,7 +132,7 @@ class BlanketDB:
                          '(bucket text, timestamp timestamp, data text);')
         self.now = now
 
-    def store(self, data: Any, bucket: str='default') -> Dict[str, Any]:
+    def store(self, data: Any, bucket: str = 'default') -> Dict[str, Any]:
         '''Serialize `data` to json and store it under `bucket`.'''
         entry_id = None
         bucket = bucket.lower()
@@ -146,7 +146,7 @@ class BlanketDB:
                     timestamp=timestamp.isoformat(), data=data)
 
     def store_dict(self,
-                   bucket: str='default',
+                   bucket: str = 'default',
                    **kwargs: Dict[str, Any]) -> Dict[str, Any]:
         '''Serialize key word args to json and store under `bucket`.'''
         return self.store(kwargs, bucket)
@@ -166,12 +166,12 @@ class BlanketDB:
             else:
                 return None
 
-    def query(self, bucket: str=None,
-              since_id: Optional[int]=None,
-              since: Optional[DateLike]=None,
-              before_id: Optional[int]=None,
-              before: Optional[DateLike]=None,
-              limit: int=-1, newest_first: bool=True) \
+    def query(self, bucket: str = None,
+              since_id: Optional[int] = None,
+              since: Optional[DateLike] = None,
+              before_id: Optional[int] = None,
+              before: Optional[DateLike] = None,
+              limit: int = -1, newest_first: bool = True) \
             -> Iterable[Dict[str, Any]]:
         '''Query this `BlanketDB` instance using various optional filters.
            `since` and `since_id` are inclusive, `before` and `before` are
@@ -206,11 +206,11 @@ class BlanketDB:
         with self.connection as conn:
             conn.execute('DELETE FROM blanketdb WHERE rowid=?;', (entry_id,))
 
-    def delete(self, bucket: str=None,
-               since_id: Optional[int]=None,
-               since: Optional[DateLike]=None,
-               before_id: Optional[int]=None,
-               before: Optional[DateLike]=None) \
+    def delete(self, bucket: str = None,
+               since_id: Optional[int] = None,
+               since: Optional[DateLike] = None,
+               before_id: Optional[int] = None,
+               before: Optional[DateLike] = None) \
             -> Any:
         '''Delete entries from this `BlanketDB` instance
            using various filters. `since` and `since_id` are inclusive,
@@ -235,8 +235,8 @@ class BlanketDB:
             -> Iterable[bytes]:
         '''WSGI conform callable method.'''
         def start_json_response(status: int,
-                                headers: List[Any]=[('Content-Type',
-                                                     'application/json')]) \
+                                headers: List[Any] = [('Content-Type',
+                                                       'application/json')]) \
                 -> None:
             start_response(_HTTP_STATUS_CODES[status], headers)
 
