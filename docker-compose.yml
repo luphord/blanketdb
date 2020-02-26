@@ -3,6 +3,7 @@ version: '2'
 services:
   blanketdb:
     image: luphord/blanketdb:latest
+    command: uwsgi --socket 0.0.0.0:3031 --plugins python3 --protocol uwsgi --wsgi blanketdb_wsgi:application
     build:
       context: .
     volumes:
