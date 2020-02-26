@@ -2,6 +2,12 @@
 History
 =======
 
+0.4.0 (2020-02-26)
+------------------
+
+* Start uwsgi using http protocol by default in DOCKERFILE (s.t. standalone use is possible)
+* Overwrite CMD in docker-compose file to communicate via uwsgi protocol between nginx and blanketdb container
+
 0.3.4 (2020-02-26)
 ------------------
 
