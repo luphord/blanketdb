@@ -6,8 +6,8 @@ BlanketDB
 .. image:: https://img.shields.io/pypi/v/blanketdb.svg
         :target: https://pypi.python.org/pypi/blanketdb
 
-.. image:: https://img.shields.io/travis/luphord/blanketdb.svg
-        :target: https://travis-ci.org/luphord/blanketdb
+.. image:: https://travis-ci.com/luphord/blanketdb.svg
+        :target: https://travis-ci.com/luphord/blanketdb
 
 .. image:: https://readthedocs.org/projects/blanketdb/badge/?version=latest
         :target: https://blanketdb.readthedocs.io/en/latest/?badge=latest
